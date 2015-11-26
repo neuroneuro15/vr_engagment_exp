@@ -9,8 +9,12 @@ class Spinner(graphics.Physical):
         """Spins in direction "axis" with speed "velocity" when Spinner.update_physics(dt) is called!"""
         super(Spinner, self).__init__(*args, **kwargs)
 
-        self.velocity = velocity
+        self.velocity = 0.
+        self.spin_velocity = velocity
         self.axis = axis
+
+    def start(self):
+        self.velocity = self.spin_velocity
 
     def update(self, dt):
 
@@ -23,14 +27,14 @@ class Spinner(graphics.Physical):
 class Jumper(graphics.Physical):
 
     def __init__(self, jump_velocity=2., gravity_coeff=-2.2, *args, **kwargs):
-        super(Bouncer, self).__init__(*args, **kwargs)
+        super(Jumper, self).__init__(*args, **kwargs)
 
         self.floor_height = self.position[1]
-        self.gravity_coeff= gravity_coeff
+        self.gravity_coeff = gravity_coeff
         self.jump_velocity = jump_velocity
         self.velocity = 0.
 
-    def jump(self, velocity):
+    def start(self):
 
         # Reset to floor height (to prevent air-jumping)
         if self.position[1] <= self.floor_height:
@@ -43,5 +47,8 @@ class Jumper(graphics.Physical):
         if self.position[1] > self.floor_height:
             self.velocity += (self.gravity_coeff * dt)
             self.position[1] += (self.velocity * dt)
+        else:
+            self.velocity = 0.
+
 
 
