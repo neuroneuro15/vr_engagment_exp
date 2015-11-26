@@ -31,6 +31,13 @@ def get_arena_from(file_name=graphics.resources.obj_arena, cubemap=True):
     arena.cubemap = cubemap
     return arena
 
+def update_world_position(meshes, arena_rb):
+    """# Update the positions of everything, based on the Optitrack data"""
+    for mesh in meshes:
+        mesh.world.position = arena_rb.location
+        mesh.world.rotation = arena_rb.rotation_global
+        mesh.world.rot_y += additional_rotation
+
 
 # Script
 
@@ -86,38 +93,52 @@ if interaction_level > 0:
             meshes.append(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.01))
         mesh_groups.append(meshes)
 
-    import pdb
-    pdb.set_trace()
-
     # Note: Interaction Level 2: Assign Object Properties (based on Interaction Level)
     if interaction_level > 1:
         interact_opts = [interactions.Jumper, interactions.Scaler, interactions.Spinner]
         for group in mesh_groups:
-           for mesh, new_local in zip(mesh_list, [random.choice(interact_opts) for mesh in mesh_list]):
-                mesh.local = new_local(position=mesh.local.position)
+            for mesh in group:
+                mesh.local = random.choice(interact_opts)(position=mesh.local.position) # TODO: Check
+
 
 # Note: Build Scenes (1st half, 2nd half) and window
 vir_scenes = [graphics.Scene(meshes) for meshes in mesh_groups]
+
 active_scene = graphics.Scene([arena])
 active_scene.camera = graphics.projector
 active_scene.camera.fov_y = 27.8
-active_scene.light.position = active_scene.camera.position
 active_scene.bgColor.b = .5
 
-window = graphics.Window(active_scene, fullscr=True, screen=1)
+for scene in vir_scenes + [active_scene]:
+    scene.light.position = active_scene.camera.position
 
-dt_timer = timers.dt_timer()
-with graphics.Logger(scenes=vir_scenes+[active_scene], exp_name='VR_Engagement', log_directory=os.path.join('.', 'logs'),
+window = graphics.Window(active_scene, fullscr=True, screen=1)
+window.virtual_scene = vir_scenes[0]
+window.virtual_scene.bgColor.r = .5
+
+update_world_position(window.virtual_scene.meshes + [arena], arena_rb)
+
+while True:
+    motive.update()
+    window.virtual_scene.camera.position = rat_rb.location
+    window.draw()
+    window.flip()
+    if 'escape' in event.getKeys():
+                break
+
+"""
+# dt_timer = timers.dt_timer()
+with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_directory=os.path.join('.', 'logs'),
                      metadata_dict=metadata) as logger:
 
-    for phase in xrange(nPhases):
+    # for phase in xrange(nPhases):
 
-        window.virtual_scene = vir_scenes[phase]
-        window.virtual_scene.bgColor.r = .5
+        # window.virtual_scene = vir_scenes[phase]
 
-        logger.write('Start of Phase {}'.format(phase))
 
-        for _ in timers.countdown_timer(total_phase_secs, stop_iteration=True):
+        # logger.write('Start of Phase {}'.format(phase))
+
+        while True: #for _ in timers.countdown_timer(total_phase_secs, stop_iteration=True):
 
             # Update Data
             motive.update()
@@ -126,34 +147,29 @@ with graphics.Logger(scenes=vir_scenes+[active_scene], exp_name='VR_Engagement',
             window.virtual_scene.camera.position = rat_rb.location  # FIXME: Fix when adding in tracking!
             #window.virtual_scene.camera.rotation = rat_rb.rotation_global
 
-            for mesh in window.virtual_scene.meshes + [arena]:
-
-                # Update the positions of everything, based on the Optitrack data
-                mesh.world.position = arena_rb.location
-                mesh.world.rotation = arena_rb.rotation_global
-                mesh.world.rot_y += additional_rotation
-
+            # for mesh in window.virtual_scene.meshes + [arena]:
+            #
                 # Activate the mesh's custom physics if the rat gets close
-                if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh.position)) < interaction_distance:
-                    mesh.local.start()
+                # if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh.position)) < interaction_distance:
+                #     mesh.local.start()
 
-                # Update all mesh's physics
-                mesh.local.update(dt=dt_timer.next())
+                # # Update all mesh's physics
+                # mesh.local.update(dt=dt_timer.next())
 
             # Draw and Flip
             window.draw()
-            logger.write()
+            # logger.write()
             window.flip()
 
 
             # Give keyboard option to cleanly break out of the nested for-loop
             if 'escape' in event.getKeys():
                 break
-        else:
-            continue
-        break
+        # else:
+        #     continue
+        # break
 
-
+"""
 
 
 # Note: Clean-Up Section
