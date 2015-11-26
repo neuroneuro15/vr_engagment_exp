@@ -7,20 +7,8 @@ import numpy as np
 import ratcave
 import ratcave.graphics as graphics
 
-import ratcave.graphics.resources as resources
-
 
 from psychopy import event
-
-
-# Functions
-def update_world_position(meshes, arena_rb):
-    """# Update the positions of everything, based on the Optitrack data"""
-    for mesh in meshes:
-        mesh.world.position = arena_rb.location
-        mesh.world.rotation = arena_rb.rotation_global
-        mesh.world.rot_y += additional_rotation
-
 
 # Script
 
