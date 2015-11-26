@@ -4,39 +4,10 @@ import random
 import interactions
 import motive
 import numpy as np
+import ratcave
 import ratcave.graphics as graphics
-from ratcave.utils import timers, rotate_to_var
-
-import ratcave.graphics.resources as resources
-
 
 from psychopy import event
-
-
-# Functions
-def correct_orientation(rb, n_attempts=3):
-    """Reset the orientation to account for between-session arena shifts"""
-    for attempt in range(n_attempts):
-            rb.reset_orientation()
-            motive.update()
-    arena_markers = np.array(arena_rb.point_cloud_markers)
-    additional_rotation = rotate_to_var(arena_markers)
-    return additional_rotation
-
-
-def get_arena_from(file_name=graphics.resources.obj_arena, cubemap=True):
-    """Just returns the arena mesh from a .obj file."""
-    reader = graphics.WavefrontReader(file_name)
-    arena = reader.get_mesh('Arena', lighting=True, centered=False)
-    arena.cubemap = cubemap
-    return arena
-
-def update_world_position(meshes, arena_rb):
-    """# Update the positions of everything, based on the Optitrack data"""
-    for mesh in meshes:
-        mesh.world.position = arena_rb.location
-        mesh.world.rotation = arena_rb.rotation_global
-        mesh.world.rot_y += additional_rotation
 
 
 # Script
@@ -63,12 +34,12 @@ metadata = {'Total Phases: ': nPhases,
 motive.load_project(os.path.join('..', 'vr_demo', 'vr_demo.ttp'))
 motive.update()
 arena_rb = motive.get_rigid_bodies()['Arena']
-additional_rotation = correct_orientation(arena_rb)
+additional_rotation = ratcave.utils.correct_orientation(arena_rb)
 rat_rb = motive.get_rigid_bodies()['CalibWand']
 
 
 # Note: Get Arena and locations for meshes to appear in the arena
-arena = get_arena_from(cubemap=True)
+arena = ratcave.utils.get_arena_from(cubemap=True)
 
 # Generate list of dict of position-triples (4 corners, paired with 4 sides, each with a center)
 reader =graphics.WavefrontReader(os.path.join('obj', 'VR_Playground.obj'))
@@ -116,7 +87,7 @@ window = graphics.Window(active_scene, fullscr=True, screen=1)
 window.virtual_scene = vir_scenes[0]
 window.virtual_scene.bgColor.r = .5
 
-update_world_position(window.virtual_scene.meshes + [arena], arena_rb)
+ratcave.utils.update_world_position(window.virtual_scene.meshes + [arena], arena_rb)
 
 while True:
     motive.update()
@@ -127,7 +98,7 @@ while True:
                 break
 
 """
-# dt_timer = timers.dt_timer()
+# dt_timer = ratcave.utils.timers.dt_timer()
 with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_directory=os.path.join('.', 'logs'),
                      metadata_dict=metadata) as logger:
 
@@ -138,7 +109,7 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
 
         # logger.write('Start of Phase {}'.format(phase))
 
-        while True: #for _ in timers.countdown_timer(total_phase_secs, stop_iteration=True):
+        while True: #for _ in ratcave.utils.timers.countdown_timer(total_phase_secs, stop_iteration=True):
 
             # Update Data
             motive.update()
