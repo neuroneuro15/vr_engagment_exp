@@ -59,7 +59,7 @@ class Scaler(graphics.Physical):
         """Grows and Shrinks between its scale and the end_scale endpoints with speed scale_velocity."""
 
         super(Scaler, self).__init__(*args, **kwargs)
-        self.scale_endpoints = tuple(sorted(self.scale, end_scale))
+        self.scale_endpoints = tuple(sorted((self.scale, end_scale)))
         self.scale_velocity = scale_velocity
         self.scale_direction = -1 if end_scale < self.scale else 1.
         self.timer = timers.countdown_timer(0)
