@@ -25,7 +25,6 @@ interaction_level = random.randint(0, 2)  # Three different levels
 arena_reader =graphics.WavefrontReader(os.path.join('obj', 'VR_Playground.obj'))
 arena = arena_reader.get_mesh("Arena")
 
-
 # Generate list of dict of position-triples (4 corners, paired with 4 sides, each with a center)
 mesh_pos = {'Center': None, 'Side': None, 'Corner': None}
 for coord in mesh_pos:
@@ -55,6 +54,15 @@ if interaction_level > 0:
 
 
 # Note: Build Scenes (1st half, 2nd half) and window
+vir_scenes = [graphics.Scene(meshes) for meshes in mesh_groups]
+active_scene = graphics.Scene([arena])
+
+window = graphics.Window(active_scene)
+arena.cubemap = True
 
 
 # Note: Main Experiment Logic
+
+for phase in xrange(nPhases):
+    pass
+
