@@ -1,7 +1,6 @@
-__author__ = 'nickdg'
-
 import ratcave.graphics as graphics
 from ratcave.utils import timers
+
 
 class Spinner(graphics.Physical):
 
@@ -24,8 +23,6 @@ class Spinner(graphics.Physical):
             rotation = list(self.rotation)
             rotation[self.axis] += self.velocity * dt
             self.rotation = rotation
-
-
 
 
 class Jumper(graphics.Physical):
@@ -58,7 +55,7 @@ class Jumper(graphics.Physical):
 
 class Scaler(graphics.Physical):
 
-    def __init__(self, end_scale=.2, scale_velocity = 1., *args, **kwargs):
+    def __init__(self, end_scale=.2, scale_velocity=1., *args, **kwargs):
         """Grows and Shrinks between its scale and the end_scale endpoints with speed scale_velocity."""
 
         super(Scaler, self).__init__(*args, **kwargs)
@@ -80,8 +77,3 @@ class Scaler(graphics.Physical):
 
             # Set New Scale
             self.scale += self.scale_direction * self.scale_velocity * dt
-
-
-
-
-
