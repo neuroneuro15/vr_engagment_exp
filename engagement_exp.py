@@ -13,15 +13,23 @@ import ratcave.graphics.resources as resources
 from psychopy import event
 
 
-
 # Functions
 def correct_orientation(rb, n_attempts=3):
+    """Reset the orientation to account for between-session arena shifts"""
     for attempt in range(n_attempts):
             rb.reset_orientation()
             motive.update()
     arena_markers = np.array(arena_rb.point_cloud_markers)
     additional_rotation = rotate_to_var(arena_markers)
     return additional_rotation
+
+
+def get_arena_from(file_name=graphics.resources.obj_arena, cubemap=True):
+    """Just returns the arena mesh from a .obj file."""
+    reader = graphics.WavefrontReader(file_name)
+    arena = reader.get_mesh('Arena', lighting=True, centered=False)
+    arena.cubemap = cubemap
+    return arena
 
 
 # Script
@@ -53,10 +61,7 @@ rat_rb = motive.get_rigid_bodies()['CalibWand']
 
 
 # Note: Get Arena and locations for meshes to appear in the arena
-reader = graphics.WavefrontReader(graphics.resources.obj_arena)
-arena = reader.get_mesh('Arena', lighting=True, centered=False)
-arena.cubemap = True
-del reader
+arena = get_arena_from(cubemap=True)
 
 # Generate list of dict of position-triples (4 corners, paired with 4 sides, each with a center)
 reader =graphics.WavefrontReader(os.path.join('obj', 'VR_Playground.obj'))
@@ -64,8 +69,9 @@ mesh_pos = {'Center': None, 'Side': None, 'Corner': None}
 for coord in mesh_pos:
     mesh_name = 'Pos' + coord + str(corner_idx) if coord is not 'Center' else 'Pos' + coord
     mesh = reader.get_mesh(mesh_name)
-    mesh_pos[coord] = mesh.local.position
+    mesh_pos[coord] = mesh.local.position # TODO: Make sure this is the correct position
 del reader
+
 
 
 # Note: Only for interaction levels 1 and 2 (No Virtual Meshes in interaction level 0)
@@ -77,7 +83,9 @@ if interaction_level > 0:
     for phase in range(nPhases):
         meshes = []
         for pos_coords in mesh_pos.values():
-            meshes.append(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.01))
+            mesh = vir_reader.get_mesh(random.choice(vir_reader.mesh_names), centered=True, scale=.01)
+            mesh.local.position = pos_coords
+            meshes.append(mesh)
         mesh_groups.append(meshes)
 
     import pdb
