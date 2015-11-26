@@ -12,15 +12,19 @@ class Spinner(graphics.Physical):
         self.velocity = 0.
         self.spin_velocity = velocity
         self.axis = axis
+        self.timer = timers.countdown_timer(0)
 
     def start(self):
         self.velocity = self.spin_velocity
+        self.timer = timers.countdown_timer(2.)
 
     def update(self, dt):
+        # Keep spinning if timeout hasn't completed.
+        if self.timer.next() > 0.:
+            rotation = list(self.rotation)
+            rotation[self.axis] += self.velocity * dt
+            self.rotation = rotation
 
-        rotation = list(self.rotation)
-        rotation[self.axis] += self.velocity * dt
-        self.rotation = rotation
 
 
 
