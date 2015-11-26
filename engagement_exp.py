@@ -3,7 +3,9 @@ __author__ = 'nickdg'
 import os
 import random
 import interactions
+import numpy as np
 import ratcave.graphics as graphics
+from ratcave.utils import timers
 import ratcave.graphics.resources as resources
 
 
@@ -11,14 +13,28 @@ from psychopy import event
 
 # Note: Collect Metadata (subject, mainly)
 
+
+# Note: Set Session Parameters and add to Metadata dictionary for the log
 nPhases = 2
+total_phase_secs = 5 * 60.  # 5 minutes
 corner_idx = random.randint(1, 4)  # Select which corner everything appears in.
 interaction_level = random.randint(0, 2)  # Three different levels
+interaction_distance = .05  # In meters (I think)
+
+metadata = {'Total Phases: ': nPhases,
+            'Phase Time (secs)': total_phase_secs,
+            'Corner ID where Objects Appear:': corner_idx,
+            'Interactivity Amount (0-2)': interaction_level,
+            'Rat-Object Distance Where Interaction Activates (meters)': interaction_distance}
+
 
 # Note: Connect to Motive, and get rigid bodies to track
-
-
-
+# FIXME: Plan to use the NatNetClient, not MotivePy, for this experiment.
+import motive
+motive.load_project()
+motive.update()
+arena_rb = motive.get_rigid_bodies()['Arena']
+rat_rb = motive.get_rigid_bodies()['Rat']
 
 
 # Note: Get Arena and locations for meshes to appear in the arena
@@ -62,7 +78,49 @@ arena.cubemap = True
 
 
 # Note: Main Experiment Logic
+with graphics.Logger(scenes=vir_scenes+[active_scene], exp_name='VR_Engagement', log_directory=os.path.join('.', 'logs'),
+                     metadata_dict=metadata) as logger:
 
-for phase in xrange(nPhases):
-    pass
+    for phase in xrange(nPhases):
 
+        window.virtual_scene = vir_scenes[phase]
+        logger.write('Start of Phase {}'.format(phase))
+
+        for _ in timers.countdown_timer(total_phase_secs, stop_iteration=True):
+
+            # Update Data
+            motive.update()
+
+            for mesh in window.virtual_scene.meshes:
+
+                # Update the Rat's position on the virtual scene's camera
+                window.virtual_scene.camera.position = rat_rb.location  # FIXME: Fix when adding in tracking!
+                window.virtual_scene.camera.rotation = rat_rb.rotation
+
+                # Update the positions of everything, based on the Optitrack data
+                mesh.world.position = arena.local.position
+                mesh.world.rotation = arena.local.rotation
+
+                # Activate the mesh's custom physics if the rat gets close
+                if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh)) < interaction_distance:
+                    mesh.local.start()
+
+                # Update all mesh's physics
+                mesh.local.update()
+
+            # Draw and Flip
+            window.draw()
+            window.flip()
+
+            # Give keyboard option to cleanly break out of the nested for-loop
+            if 'escape' in event.getKeys():
+                break
+        else:
+            continue
+        break
+
+
+
+
+# Note: Clean-Up Section
+window.close()
