@@ -1,8 +1,8 @@
-__author__ = 'nickdg'
 
 import os
 import random
 import interactions
+import motive
 import numpy as np
 import ratcave.graphics as graphics
 from ratcave.utils import timers, rotate_to_var
@@ -12,11 +12,25 @@ import ratcave.graphics.resources as resources
 
 from psychopy import event
 
+
+
+# Functions
+def correct_orientation(rb, n_attempts=3):
+    for attempt in range(n_attempts):
+            rb.reset_orientation()
+            motive.update()
+    arena_markers = np.array(arena_rb.point_cloud_markers)
+    additional_rotation = rotate_to_var(arena_markers)
+    return additional_rotation
+
+
+# Script
+
 # Note: Collect Metadata (subject, mainly, and Session Parameters) for the log
 nPhases = 2
 total_phase_secs = 5 * 60.  # 5 minutes
-corner_idx = 1 #random.randint(1, 4)  # Select which corner everything appears in.
-interaction_level = 0 #random.randint(0, 2)  # Three different levels
+corner_idx = 1 # random.randint(1, 4)  # Select which corner everything appears in.
+interaction_level = 1 # random.randint(0, 2)  # Three different levels
 interaction_distance = .05  # In meters (I think)
 
 metadata = {'Total Phases: ': nPhases,
@@ -27,20 +41,15 @@ metadata = {'Total Phases: ': nPhases,
             'Experimenter': 'Nicholas A. Del Grosso'}
 
 
+
 # Note: Connect to Motive, and get rigid bodies to track
 # FIXME: Plan to use the NatNetClient, not MotivePy, for this experiment.
-import motive
+
 motive.load_project(os.path.join('..', 'vr_demo', 'vr_demo.ttp'))
 motive.update()
 arena_rb = motive.get_rigid_bodies()['Arena']
-rat_rb = motive.get_rigid_bodies()['Rat']
-
-# Calculate Arena's orientation
-for attempt in range(3):
-        arena_rb.reset_orientation()
-        motive.update()
-arena_markers = np.array(arena_rb.point_cloud_markers)
-additional_rotation = rotate_to_var(arena_markers)
+additional_rotation = correct_orientation(arena_rb)
+rat_rb = motive.get_rigid_bodies()['CalibWand']
 
 
 # Note: Get Arena and locations for meshes to appear in the arena
@@ -60,17 +69,22 @@ del reader
 
 
 # Note: Only for interaction levels 1 and 2 (No Virtual Meshes in interaction level 0)
-mesh_groups = [[]] * nPhases
+mesh_groups = []
 if interaction_level > 0:
 
     # Note: Import Mesh Objects (randomly chosen) and put in groups of three, one group for each phase
     vir_reader = graphics.WavefrontReader(os.path.join('obj', 'NOP_Primitives.obj'))
-    for group in mesh_groups:
-        mesh_list = []
+    for phase in range(nPhases):
+        meshes = []
         for pos_coords in mesh_pos.values():
-            mesh_list.append(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True))
+            meshes.append(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.01))
+        mesh_groups.append(meshes)
+
+    import pdb
+    pdb.set_trace()
+
     # Note: Interaction Level 2: Assign Object Properties (based on Interaction Level)
-    if interaction_level == 2:
+    if interaction_level > 1:
         interact_opts = [interactions.Jumper, interactions.Scaler, interactions.Spinner]
         for group in mesh_groups:
            for mesh, new_local in zip(mesh_list, [random.choice(interact_opts) for mesh in mesh_list]):
@@ -85,17 +99,6 @@ active_scene.light.position = active_scene.camera.position
 active_scene.bgColor.b = .5
 
 window = graphics.Window(active_scene, fullscr=True, screen=1)
-
-# while 'escape' not in event.getKeys():
-#         motive.update()
-#         for mesh in window.virtual_scene.meshes + [arena]:
-#             mesh.world.position = arena_rb.location
-#             mesh.world.rotation = arena_rb.rotation_global
-#             mesh.world.rot_y += additional_rotation
-#         window.draw()
-#         window.flip()
-# #
-# Note: Main Experiment Logic
 
 dt_timer = timers.dt_timer()
 with graphics.Logger(scenes=vir_scenes+[active_scene], exp_name='VR_Engagement', log_directory=os.path.join('.', 'logs'),
@@ -115,7 +118,7 @@ with graphics.Logger(scenes=vir_scenes+[active_scene], exp_name='VR_Engagement',
 
             # Update the Rat's position on the virtual scene's camera
             window.virtual_scene.camera.position = rat_rb.location  # FIXME: Fix when adding in tracking!
-            window.virtual_scene.camera.rotation = rat_rb.rotation_global
+            #window.virtual_scene.camera.rotation = rat_rb.rotation_global
 
             for mesh in window.virtual_scene.meshes + [arena]:
 
