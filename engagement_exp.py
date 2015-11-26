@@ -83,9 +83,7 @@ if interaction_level > 0:
     for phase in range(nPhases):
         meshes = []
         for pos_coords in mesh_pos.values():
-            mesh = vir_reader.get_mesh(random.choice(vir_reader.mesh_names), centered=True, scale=.01)
-            mesh.local.position = pos_coords
-            meshes.append(mesh)
+            meshes.append(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.01))
         mesh_groups.append(meshes)
 
     import pdb
