@@ -7,14 +7,26 @@ import numpy as np
 import ratcave
 import ratcave.graphics as graphics
 
+import ratcave.graphics.resources as resources
+
+
 from psychopy import event
+
+
+# Functions
+def update_world_position(meshes, arena_rb):
+    """# Update the positions of everything, based on the Optitrack data"""
+    for mesh in meshes:
+        mesh.world.position = arena_rb.location
+        mesh.world.rotation = arena_rb.rotation_global
+        mesh.world.rot_y += additional_rotation
 
 
 # Script
 
 # Note: Collect Metadata (subject, mainly, and Session Parameters) for the log
-nPhases = 2
-total_phase_secs = 5 * 60.  # 5 minutes
+nPhases = 3
+total_phase_secs = 5 #5 * 60.  # 5 minutes
 corner_idx = 1 # random.randint(1, 4)  # Select which corner everything appears in.
 interaction_level = 1 # random.randint(0, 2)  # Three different levels
 interaction_distance = .05  # In meters (I think)
@@ -84,39 +96,36 @@ for scene in vir_scenes + [active_scene]:
     scene.light.position = active_scene.camera.position
 
 window = graphics.Window(active_scene, fullscr=True, screen=1)
-window.virtual_scene = vir_scenes[0]
-window.virtual_scene.bgColor.r = .5
 
-ratcave.utils.update_world_position(window.virtual_scene.meshes + [arena], arena_rb)
+# while True:
+#     motive.update()
+#     window.virtual_scene.camera.position = rat_rb.location
+#     window.draw()
+#     window.flip()
+#     if 'escape' in event.getKeys():
+#                 break
 
-while True:
-    motive.update()
-    window.virtual_scene.camera.position = rat_rb.location
-    window.draw()
-    window.flip()
-    if 'escape' in event.getKeys():
-                break
 
-"""
 # dt_timer = ratcave.utils.timers.dt_timer()
 with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_directory=os.path.join('.', 'logs'),
                      metadata_dict=metadata) as logger:
 
-    # for phase in xrange(nPhases):
+    for phase in xrange(nPhases):
 
-        # window.virtual_scene = vir_scenes[phase]
+        window.virtual_scene = vir_scenes[phase]
+        window.virtual_scene.bgColor.r = .2
+        ratcave.utils.update_world_position(window.virtual_scene.meshes + [arena], arena_rb, additional_rotation)
 
+        logger.write('Start of Phase {}'.format(phase))
 
-        # logger.write('Start of Phase {}'.format(phase))
-
-        while True: #for _ in ratcave.utils.timers.countdown_timer(total_phase_secs, stop_iteration=True):
+        for _ in ratcave.utils.timers.countdown_timer(total_phase_secs, stop_iteration=True):
 
             # Update Data
             motive.update()
 
             # Update the Rat's position on the virtual scene's camera
             window.virtual_scene.camera.position = rat_rb.location  # FIXME: Fix when adding in tracking!
-            #window.virtual_scene.camera.rotation = rat_rb.rotation_global
+            window.virtual_scene.camera.rotation = rat_rb.rotation_global
 
             # for mesh in window.virtual_scene.meshes + [arena]:
             #
@@ -136,11 +145,11 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
             # Give keyboard option to cleanly break out of the nested for-loop
             if 'escape' in event.getKeys():
                 break
-        # else:
-        #     continue
-        # break
+        else:
+            continue
+        break
 
-"""
+
 
 
 # Note: Clean-Up Section
