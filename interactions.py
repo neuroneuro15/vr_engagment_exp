@@ -5,7 +5,7 @@ import random
 
 class Spinner(graphics.Physical):
 
-    def __init__(self, spin_velocity=45., axis=1, *args, **kwargs):
+    def __init__(self, spin_velocity=60., axis=1, *args, **kwargs):
         """Spins in direction "axis" with speed "velocity" when Spinner.update_physics(dt) is called!"""
         super(Spinner, self).__init__(*args, **kwargs)
 
@@ -29,18 +29,23 @@ class Spinner(graphics.Physical):
 
 class Jumper(graphics.Physical):
 
-    def __init__(self, jump_velocity=1., gravity_coeff=-5.5, *args, **kwargs):
+    def __init__(self, jump_velocity=.8, gravity_coeff=-5., jump_count=3, *args, **kwargs):
         """Jumps with jump_velocity, coming back down at rate gravity_coeff."""
         super(Jumper, self).__init__(*args, **kwargs)
 
         self.floor_height = self.y
         self.gravity_coeff = gravity_coeff
         self.jump_velocity = jump_velocity
+        self.jump_count = jump_count
+        self.jumps_remaining = 0
         self.velocity = 0.
 
     def start(self):
 
         # Reset to floor height (to prevent air-jumping)
+        if not self.jumps_remaining:
+            self.jumps_remaining += self.jump_count
+
         if self.y <= self.floor_height:
             self.y = self.floor_height
             self.velocity = self.jump_velocity
@@ -52,13 +57,18 @@ class Jumper(graphics.Physical):
         if self.y > self.floor_height:
             self.velocity += (self.gravity_coeff * dt)
             self.y += (self.velocity * dt)
+        elif self.y < self.floor_height:
+            self.jump_count -= 1
+            self.y = self.floor_height + .005
+            if self.jump_count > 0:
+                self.start()
         else:
             self.velocity = 0.
 
 
 class Scaler(graphics.Physical):
 
-    def __init__(self, end_scale=.5, scale_velocity=.01, *args, **kwargs):
+    def __init__(self, end_scale=.5, scale_velocity=.03, *args, **kwargs):
         """Grows and Shrinks between its scale and the end_scale (relative to its current scale) endpoints with speed scale_velocity."""
 
         super(Scaler, self).__init__(*args, **kwargs)

@@ -67,7 +67,7 @@ if interaction_level > 0:
 
     # Note: Interaction Level 2: Assign Object Properties (based on Interaction Level)
     if interaction_level > 1:
-        interact_opts = [interactions.Spinner]#, interactions.Scaler] #, interactions.Jumper]#, , ]
+        interact_opts = [interactions.Spinner, interactions.Scaler, interactions.Jumper]
         for group in mesh_groups:
             for mesh in group:
                 mesh.local = random.choice(interact_opts)(position=mesh.local.position, scale=mesh.local.scale) # TODO: Check
