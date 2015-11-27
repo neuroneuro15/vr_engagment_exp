@@ -21,17 +21,19 @@ class Spinner(graphics.Physical):
         # Keep spinning if timeout hasn't completed.
         if self.timer.next() > 0.:
             rotation = list(self.rotation)
-            rotation[self.axis] += self.velocity * dt
+            #rotation[self.axis] += self.velocity * dt
+            setattr(self, 'xyz'[self.axis], getattr(self, 'xyz'[self.axis] + self.velocity * dt))
+
             self.rotation = rotation
 
 
 class Jumper(graphics.Physical):
 
-    def __init__(self, jump_velocity=2., gravity_coeff=-2.2, *args, **kwargs):
+    def __init__(self, jump_velocity=2., gravity_coeff=-5.5, *args, **kwargs):
         """Jumps with jump_velocity, coming back down at rate gravity_coeff."""
         super(Jumper, self).__init__(*args, **kwargs)
 
-        self.floor_height = self.position[1]
+        self.floor_height = self.y
         self.gravity_coeff = gravity_coeff
         self.jump_velocity = jump_velocity
         self.velocity = 0.
@@ -39,16 +41,17 @@ class Jumper(graphics.Physical):
     def start(self):
 
         # Reset to floor height (to prevent air-jumping)
-        if self.position[1] <= self.floor_height:
-            self.position[1] = self.floor_height
+        if self.y <= self.floor_height:
+            self.y = self.floor_height
             self.velocity = self.jump_velocity
+            self.y = self.floor_height + .005
 
     def update(self, dt):
 
         # if in the air, update position via gravitational constant
-        if self.position[1] > self.floor_height:
+        if self.y > self.floor_height:
             self.velocity += (self.gravity_coeff * dt)
-            self.position[1] += (self.velocity * dt)
+            self.y += (self.velocity * dt)
         else:
             self.velocity = 0.
 

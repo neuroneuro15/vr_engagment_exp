@@ -1,6 +1,7 @@
 
 import os
 import random
+import itertools
 import interactions
 import motive
 import numpy as np
@@ -8,16 +9,16 @@ import ratcave
 import ratcave.graphics as graphics
 
 
-from psychopy import event
+from psychopy import event, sound
 
 # Script
 
 # Note: Collect Metadata (subject, mainly, and Session Parameters) for the log
-nPhases = 3
-total_phase_secs = 5 #5 * 60.  # 5 minutes
+nPhases = 2
+total_phase_secs = 5 * 60.  # 5 minutes
 corner_idx = 1 # random.randint(1, 4)  # Select which corner everything appears in.
-interaction_level = 1 # random.randint(0, 2)  # Three different levels
-interaction_distance = .05  # In meters (I think)
+interaction_level = 2 # random.randint(0, 2)  # Three different levels
+interaction_distance = .15  # In meters (I think)
 
 metadata = {'Total Phases: ': nPhases,
             'Phase Time (secs)': total_phase_secs,
@@ -66,10 +67,10 @@ if interaction_level > 0:
 
     # Note: Interaction Level 2: Assign Object Properties (based on Interaction Level)
     if interaction_level > 1:
-        interact_opts = [interactions.Jumper, interactions.Scaler, interactions.Spinner]
+        interact_opts = [interactions.Jumper]#, interactions.Scaler, interactions.Spinner]
         for group in mesh_groups:
             for mesh in group:
-                mesh.local = random.choice(interact_opts)(position=mesh.local.position) # TODO: Check
+                mesh.local = random.choice(interact_opts)(position=mesh.local.position, scale=mesh.local.scale) # TODO: Check
 
 
 # Note: Build Scenes (1st half, 2nd half) and window
@@ -93,8 +94,8 @@ window = graphics.Window(active_scene, fullscr=True, screen=1)
 #     if 'escape' in event.getKeys():
 #                 break
 
-
-# dt_timer = ratcave.utils.timers.dt_timer()
+tone = sound.Sound()
+#dt_timer = ratcave.utils.timers.dt_timer()
 with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_directory=os.path.join('.', 'logs'),
                      metadata_dict=metadata) as logger:
 
@@ -106,7 +107,8 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
 
         logger.write('Start of Phase {}'.format(phase))
 
-        for _ in ratcave.utils.timers.countdown_timer(total_phase_secs, stop_iteration=True):
+        for _, dt in itertools.izip(ratcave.utils.timers.countdown_timer(total_phase_secs, stop_iteration=True),
+                                    ratcave.utils.timers.dt_timer()):
 
             # Update Data
             motive.update()
@@ -115,14 +117,17 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
             window.virtual_scene.camera.position = rat_rb.location  # FIXME: Fix when adding in tracking!
             window.virtual_scene.camera.rotation = rat_rb.rotation_global
 
-            # for mesh in window.virtual_scene.meshes + [arena]:
-            #
-                # Activate the mesh's custom physics if the rat gets close
-                # if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh.position)) < interaction_distance:
-                #     mesh.local.start()
+            # dt = dt_timer.next()
+            for mesh in window.virtual_scene.meshes + [arena]:
 
-                # # Update all mesh's physics
-                # mesh.local.update(dt=dt_timer.next())
+                # Activate the mesh's custom physics if the rat gets close
+                if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh.position)) < interaction_distance:
+                    tone.play()
+                    mesh.local.start()
+
+
+                # Update all mesh's physics
+                mesh.local.update(dt)
 
             # Draw and Flip
             window.draw()
