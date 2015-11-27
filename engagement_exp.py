@@ -131,6 +131,9 @@ tone.play()  # Just to get the experimenter's attention
 while not tracker.is_recording:
     pass
 
+while 'space' not in event.getKeys():
+    print("Waiting for the rat to enter arena.  Once you've put him in, Press space to continue...")
+
 # Note: Main Experiment Loop
 
 with graphics.Logger(scenes=[active_scene]+vir_scenes, exp_name=exp_name, log_directory=os.path.join('.', 'logs'),
