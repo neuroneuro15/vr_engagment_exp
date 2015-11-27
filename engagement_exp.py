@@ -66,6 +66,8 @@ if interaction_level > 0:
     for phase in range(nPhases):
         meshes = []
         for pos_coords in mesh_pos.values():
+            import pdb
+            pdb.set_trace()
             meshes.append(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.02))
         mesh_groups.append(meshes)
 
