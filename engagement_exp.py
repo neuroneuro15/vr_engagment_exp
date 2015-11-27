@@ -16,8 +16,8 @@ import copy
 nPhases = 2
 total_phase_secs = 5 * 60.  # 5 minutes
 corner_idx = random.randint(1, 4)  # Select which corner everything appears in.
-interaction_level = 2 # random.randint(0, 2)  # Three different levels
-interaction_distance = .1  # In meters (I think)
+interaction_level =random.randint(0, 2)  # Three different levels
+interaction_distance = .15  # In meters (I think)
 
 metadata = {'Total Phases: ': nPhases,
             'Phase Time (secs)': total_phase_secs,
@@ -40,8 +40,8 @@ rat_rb = motive.get_rigid_bodies()['CalibWand']
 
 # Note: Get Arena and locations for meshes to appear in the arena
 arena = ratcave.utils.get_arena_from(cubemap=True)
-vir_arena = ratcave.utils.get_arena_from(cubemap=False)
-vir_arena.load_texture(graphics.resources.img_colorgrid)
+vir_arena = ratcave.utils.get_arena_from(os.path.join('obj', 'VR_Playground.blend'), cubemap=False)
+vir_arena.load_texture(graphics.resources.img_uvgrid)
 
 # Generate list of dict of position-triples (4 corners, paired with 4 sides, each with a center)
 reader =graphics.WavefrontReader(os.path.join('obj', 'VR_Playground.obj'))
@@ -49,7 +49,9 @@ mesh_pos = {'Center': None, 'Side': None, 'Corner': None}
 for coord in mesh_pos:
     mesh_name = 'Pos' + coord + str(corner_idx) if coord is not 'Center' else 'Pos' + coord
     mesh = reader.get_mesh(mesh_name)
+    mesh.local.y += .03
     mesh_pos[coord] = mesh.local.position # TODO: Make sure this is the correct position
+
 del reader
 
 
@@ -63,7 +65,7 @@ if interaction_level > 0:
     for phase in range(nPhases):
         meshes = []
         for pos_coords in mesh_pos.values():
-            meshes.append(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.006))
+            meshes.append(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.02))
         mesh_groups.append(meshes)
 
     # Note: Interaction Level 2: Assign Object Properties (based on Interaction Level)
