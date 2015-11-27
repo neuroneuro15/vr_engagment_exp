@@ -66,9 +66,16 @@ if interaction_level > 0:
     for phase in range(nPhases):
         meshes = []
         for pos_coords in mesh_pos.values():
-            import pdb
-            pdb.set_trace()
-            meshes.append(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.02))
+            # Read Mesh
+            mesh = vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.02)
+
+            # Randomly Set Color
+            mesh.material.diffuse.rgb = random.rand(3).tolist()
+            mesh.material.spec_color.rgb = random.rand(3).tolist()
+            mesh.material.spec_weight = random.choice([0., 1., 3., 20.])
+
+            # Append to List
+            meshes.append(mesh)
         mesh_groups.append(meshes)
 
     # Note: Interaction Level 2: Assign Object Properties (based on Interaction Level)
