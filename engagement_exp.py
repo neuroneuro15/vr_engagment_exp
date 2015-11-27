@@ -8,8 +8,8 @@ import numpy as np
 from numpy import random
 import ratcave
 import ratcave.graphics as graphics
-from psychopy import event, sound
-import copy
+from psychopy import event, sound, gui
+import sys
 
 # Script
 
@@ -27,7 +27,13 @@ metadata = {'Total Phases: ': nPhases,
             'Rat-Object Distance Where Interaction Activates (meters)': interaction_distance,
             'Experimenter': 'Nicholas A. Del Grosso'}
 
-
+info = {'Rat': ['Nessie', 'FuzzPatch', 'FlatWhite', 'Bridger']}
+dlg = gui.DlgFromDict(info, 'Input Rat Name:')
+if dlg.OK:
+    metadata.update(info)
+else:
+    print("User Cancelled. Exiting...")
+    sys.exit()
 
 # Note: Connect to Motive, and get rigid bodies to track
 # FIXME: Plan to use the NatNetClient, not MotivePy, for this experiment.
