@@ -5,7 +5,7 @@ import random
 
 class Spinner(graphics.Physical):
 
-    def __init__(self, spin_velocity=120., axis=1, *args, **kwargs):
+    def __init__(self, spin_velocity=180., axis=1, *args, **kwargs):
         """Spins in direction "axis" with speed "velocity" when Spinner.update_physics(dt) is called!"""
         super(Spinner, self).__init__(*args, **kwargs)
 
@@ -70,7 +70,7 @@ class Jumper(graphics.Physical):
 
 class Scaler(graphics.Physical):
 
-    def __init__(self, end_scale=.5, scale_velocity=.015, *args, **kwargs):
+    def __init__(self, end_scale=.5, scale_velocity=.025, *args, **kwargs):
         """Grows and Shrinks between its scale and the end_scale (relative to its current scale) endpoints with speed scale_velocity."""
 
         super(Scaler, self).__init__(*args, **kwargs)

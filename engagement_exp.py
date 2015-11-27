@@ -3,13 +3,16 @@ import os
 
 import itertools
 import interactions
-import motive
+
 import numpy as np
 from numpy import random
 import ratcave
 import ratcave.graphics as graphics
 from psychopy import event, sound, gui
 import sys
+
+#import motive
+import natnetclient
 
 # Script
 
@@ -38,12 +41,19 @@ else:
 # Note: Connect to Motive, and get rigid bodies to track
 # FIXME: Plan to use the NatNetClient, not MotivePy, for this experiment.
 
+# MotivePy code
+"""
 motive.load_project('vr_demo.ttp')
 motive.update()
 arena_rb = motive.get_rigid_bodies()['Arena']
-additional_rotation = ratcave.utils.correct_orientation(arena_rb)
+additional_rotation = ratcave.utils.correct_orientation_motivepy(arena_rb)
 rat_rb = motive.get_rigid_bodies()['CalibWand']
-
+"""
+# NatNetClient code
+tracker = natnetclient.NatClient()
+arena_rb = tracker.rigid_bodies['Arena']
+additional_rotation = ratcave.utils.correct_orientation_natnet(arena_rb)
+rat_rb = tracker.rigid_bodies['CalibWand']
 
 # Note: Get Arena and locations for meshes to appear in the arena
 arena = ratcave.utils.get_arena_from(cubemap=True)
@@ -116,7 +126,7 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
 
         window.virtual_scene = vir_scenes[phase]
         window.virtual_scene.bgColor.g = .2
-        ratcave.utils.update_world_position(window.virtual_scene.meshes + [arena], arena_rb, additional_rotation)
+        ratcave.utils.update_world_position_natnet(window.virtual_scene.meshes + [arena], arena_rb, additional_rotation)
 
         logger.write('Start of Phase {}'.format(phase))
 
@@ -124,11 +134,11 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
                                     ratcave.utils.timers.dt_timer()):
 
             # Update Data
-            motive.update()
+            #motive.update()
 
             # Update the Rat's position on the virtual scene's camera
-            window.virtual_scene.camera.position = rat_rb.location  # FIXME: Fix when adding in tracking!
-            window.virtual_scene.camera.rotation = rat_rb.rotation_global
+            window.virtual_scene.camera.position = rat_rb.position#rat_rb.location  # FIXME: Fix when adding in tracking!
+            window.virtual_scene.camera.rotation = rat_rb.rotation#rat_rb.rotation_global
 
             # dt = dt_timer.next()
             for mesh in window.virtual_scene.meshes + [arena]:
