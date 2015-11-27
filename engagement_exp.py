@@ -7,9 +7,8 @@ import motive
 import numpy as np
 import ratcave
 import ratcave.graphics as graphics
-
-
 from psychopy import event, sound
+import copy
 
 # Script
 
@@ -41,6 +40,8 @@ rat_rb = motive.get_rigid_bodies()['CalibWand']
 
 # Note: Get Arena and locations for meshes to appear in the arena
 arena = ratcave.utils.get_arena_from(cubemap=True)
+vir_arena = ratcave.utils.get_arena_from(cubemap=False)
+vir_arena.load_texture(graphics.resources.img_colorgrid)
 
 # Generate list of dict of position-triples (4 corners, paired with 4 sides, each with a center)
 reader =graphics.WavefrontReader(os.path.join('obj', 'VR_Playground.obj'))
@@ -74,12 +75,12 @@ if interaction_level > 0:
 
 
 # Note: Build Scenes (1st half, 2nd half) and window
-vir_scenes = [graphics.Scene(meshes) for meshes in mesh_groups]
+vir_scenes = [graphics.Scene(meshes+[vir_arena]) for meshes in mesh_groups]
 
 active_scene = graphics.Scene([arena])
 active_scene.camera = graphics.projector
 active_scene.camera.fov_y = 27.8
-active_scene.bgColor.b = .5
+active_scene.bgColor.b = .2
 
 for scene in vir_scenes + [active_scene]:
     scene.light.position = active_scene.camera.position
@@ -93,7 +94,7 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
     for phase in xrange(nPhases):
 
         window.virtual_scene = vir_scenes[phase]
-        window.virtual_scene.bgColor.r = .2
+        window.virtual_scene.bgColor.g = .2
         ratcave.utils.update_world_position(window.virtual_scene.meshes + [arena], arena_rb, additional_rotation)
 
         logger.write('Start of Phase {}'.format(phase))
@@ -112,7 +113,7 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
             for mesh in window.virtual_scene.meshes + [arena]:
 
                 # Activate the mesh's custom physics if the rat gets close
-                if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh.position)) < interaction_distance:
+                if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh.position)[::2]) < interaction_distance:
                     # tone.play()
                     mesh.local.start()
 

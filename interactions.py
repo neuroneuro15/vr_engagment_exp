@@ -5,7 +5,7 @@ import random
 
 class Spinner(graphics.Physical):
 
-    def __init__(self, spin_velocity=60., axis=1, *args, **kwargs):
+    def __init__(self, spin_velocity=90., axis=1, *args, **kwargs):
         """Spins in direction "axis" with speed "velocity" when Spinner.update_physics(dt) is called!"""
         super(Spinner, self).__init__(*args, **kwargs)
 
@@ -29,7 +29,7 @@ class Spinner(graphics.Physical):
 
 class Jumper(graphics.Physical):
 
-    def __init__(self, jump_velocity=.8, gravity_coeff=-5., jump_count=3, *args, **kwargs):
+    def __init__(self, jump_velocity=.6, gravity_coeff=-5., jump_count=3, *args, **kwargs):
         """Jumps with jump_velocity, coming back down at rate gravity_coeff."""
         super(Jumper, self).__init__(*args, **kwargs)
 
@@ -44,12 +44,16 @@ class Jumper(graphics.Physical):
 
         # Reset to floor height (to prevent air-jumping)
         if not self.jumps_remaining:
-            self.jumps_remaining += self.jump_count
+            self.jumps_remaining = self.jump_count
+        else:
+            self.jumps_remaining -= 1
 
         if self.y <= self.floor_height:
-            self.y = self.floor_height
-            self.velocity = self.jump_velocity
             self.y = self.floor_height + .005
+            self.velocity = self.jump_velocity
+
+
+
 
     def update(self, dt):
 
@@ -58,14 +62,13 @@ class Jumper(graphics.Physical):
             self.velocity += (self.gravity_coeff * dt)
             self.y += (self.velocity * dt)
             return
-        elif self.y < self.floor_height:
-            self.jump_count -= 1
-            self.y = self.floor_height + .005
-            if self.jump_count > 0:
+        elif self.y <= self.floor_height:
+            self.velocity = 0
+            if self.jumps_remaining > 0:
                 self.start()
+            else:
+                self.y = self.floor_height
             return
-        else:
-            self.velocity = 0.
 
 
 class Scaler(graphics.Physical):
