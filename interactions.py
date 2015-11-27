@@ -52,9 +52,6 @@ class Jumper(graphics.Physical):
             self.y = self.floor_height + .005
             self.velocity = self.jump_velocity
 
-
-
-
     def update(self, dt):
 
         # if in the air, update position via gravitational constant
