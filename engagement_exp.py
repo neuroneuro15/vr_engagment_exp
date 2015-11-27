@@ -16,7 +16,7 @@ import copy
 nPhases = 2
 total_phase_secs = 5 * 60.  # 5 minutes
 corner_idx = random.randint(1, 4)  # Select which corner everything appears in.
-interaction_level =random.randint(0, 2)  # Three different levels
+interaction_level = 2 #random.randint(0, 2)  # Three different levels
 interaction_distance = .15  # In meters (I think)
 
 metadata = {'Total Phases: ': nPhases,
@@ -42,7 +42,6 @@ rat_rb = motive.get_rigid_bodies()['CalibWand']
 arena = ratcave.utils.get_arena_from(cubemap=True)
 vir_arena = ratcave.utils.get_arena_from(os.path.join('obj', 'VR_Playground.blend'), cubemap=False)
 vir_arena.load_texture(graphics.resources.img_uvgrid)
-vir_arena.local.y -= .005
 
 # Generate list of dict of position-triples (4 corners, paired with 4 sides, each with a center)
 reader =graphics.WavefrontReader(os.path.join('obj', 'VR_Playground.obj'))
@@ -50,7 +49,7 @@ mesh_pos = {'Center': None, 'Side': None, 'Corner': None}
 for coord in mesh_pos:
     mesh_name = 'Pos' + coord + str(corner_idx) if coord is not 'Center' else 'Pos' + coord
     mesh = reader.get_mesh(mesh_name)
-    mesh.local.y += .03
+    mesh.local.y += .02
     mesh_pos[coord] = mesh.local.position # TODO: Make sure this is the correct position
 
 del reader
@@ -78,7 +77,10 @@ if interaction_level > 0:
 
 
 # Note: Build Scenes (1st half, 2nd half) and window
-vir_scenes = [graphics.Scene(meshes+[vir_arena]) for meshes in mesh_groups]
+vir_scenes = [graphics.Scene([vir_arena]) for phase in range(nPhases)]
+if interaction_level > 0:
+    for meshes, scene in zip(mesh_groups, vir_scenes):
+        scene.meshes.extend(meshes)
 
 active_scene = graphics.Scene([arena])
 active_scene.camera = graphics.projector
