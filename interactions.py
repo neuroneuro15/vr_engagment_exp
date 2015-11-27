@@ -5,7 +5,7 @@ import random
 
 class Spinner(graphics.Physical):
 
-    def __init__(self, spin_velocity=90., axis=1, *args, **kwargs):
+    def __init__(self, spin_velocity=120., axis=1, *args, **kwargs):
         """Spins in direction "axis" with speed "velocity" when Spinner.update_physics(dt) is called!"""
         super(Spinner, self).__init__(*args, **kwargs)
 
@@ -29,7 +29,7 @@ class Spinner(graphics.Physical):
 
 class Jumper(graphics.Physical):
 
-    def __init__(self, jump_velocity=.6, gravity_coeff=-5., jump_count=3, *args, **kwargs):
+    def __init__(self, jump_velocity=.6, gravity_coeff=-4.5, jump_count=3, *args, **kwargs):
         """Jumps with jump_velocity, coming back down at rate gravity_coeff."""
         super(Jumper, self).__init__(*args, **kwargs)
 
