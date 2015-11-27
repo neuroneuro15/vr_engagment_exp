@@ -42,6 +42,7 @@ rat_rb = motive.get_rigid_bodies()['CalibWand']
 arena = ratcave.utils.get_arena_from(cubemap=True)
 vir_arena = ratcave.utils.get_arena_from(os.path.join('obj', 'VR_Playground.blend'), cubemap=False)
 vir_arena.load_texture(graphics.resources.img_uvgrid)
+vir_arena.local.y -= .005
 
 # Generate list of dict of position-triples (4 corners, paired with 4 sides, each with a center)
 reader =graphics.WavefrontReader(os.path.join('obj', 'VR_Playground.obj'))
