@@ -27,7 +27,7 @@ metadata = {'Total Phases: ': nPhases,
             'Rat-Object Distance Where Interaction Activates (meters)': interaction_distance,
             'Experimenter': 'Nicholas A. Del Grosso'}
 
-info = {'Rat': ['Nessie', 'FuzzPatch', 'FlatWhite', 'Bridger']}
+info = {'Rat': ['Test', 'Nessie', 'FuzzPatch', 'FlatWhite', 'Bridger']}
 dlg = gui.DlgFromDict(info, 'Input Rat Name:')
 if dlg.OK:
     metadata.update(info)
@@ -38,7 +38,7 @@ else:
 # Note: Connect to Motive, and get rigid bodies to track
 # FIXME: Plan to use the NatNetClient, not MotivePy, for this experiment.
 
-motive.load_project(os.path.join('..', 'vr_demo', 'vr_demo.ttp'))
+motive.load_project('vr_demo.ttp')
 motive.update()
 arena_rb = motive.get_rigid_bodies()['Arena']
 additional_rotation = ratcave.utils.correct_orientation(arena_rb)
