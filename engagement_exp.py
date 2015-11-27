@@ -16,9 +16,9 @@ from psychopy import event, sound
 # Note: Collect Metadata (subject, mainly, and Session Parameters) for the log
 nPhases = 2
 total_phase_secs = 5 * 60.  # 5 minutes
-corner_idx = 1 # random.randint(1, 4)  # Select which corner everything appears in.
+corner_idx = random.randint(1, 4)  # Select which corner everything appears in.
 interaction_level = 2 # random.randint(0, 2)  # Three different levels
-interaction_distance = .15  # In meters (I think)
+interaction_distance = .1  # In meters (I think)
 
 metadata = {'Total Phases: ': nPhases,
             'Phase Time (secs)': total_phase_secs,
@@ -62,7 +62,7 @@ if interaction_level > 0:
     for phase in range(nPhases):
         meshes = []
         for pos_coords in mesh_pos.values():
-            meshes.append(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.01))
+            meshes.append(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.006))
         mesh_groups.append(meshes)
 
     # Note: Interaction Level 2: Assign Object Properties (based on Interaction Level)
@@ -70,7 +70,7 @@ if interaction_level > 0:
         interact_opts = [interactions.Spinner, interactions.Scaler, interactions.Jumper]
         for group in mesh_groups:
             for mesh in group:
-                mesh.local = random.choice(interact_opts)(position=mesh.local.position, scale=mesh.local.scale) # TODO: Check
+                mesh.local = random.choice(interact_opts)(position=mesh.local.position, scale=mesh.local.scale)
 
 
 # Note: Build Scenes (1st half, 2nd half) and window
@@ -86,16 +86,7 @@ for scene in vir_scenes + [active_scene]:
 
 window = graphics.Window(active_scene, fullscr=True, screen=1)
 
-# while True:
-#     motive.update()
-#     window.virtual_scene.camera.position = rat_rb.location
-#     window.draw()
-#     window.flip()
-#     if 'escape' in event.getKeys():
-#                 break
-
-tone = sound.Sound()
-#dt_timer = ratcave.utils.timers.dt_timer()
+# tone = sound.Sound()
 with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_directory=os.path.join('.', 'logs'),
                      metadata_dict=metadata) as logger:
 
@@ -122,7 +113,7 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
 
                 # Activate the mesh's custom physics if the rat gets close
                 if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh.position)) < interaction_distance:
-                    tone.play()
+                    # tone.play()
                     mesh.local.start()
 
 
@@ -131,7 +122,7 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
 
             # Draw and Flip
             window.draw()
-            # logger.write()
+            logger.write()
             window.flip()
 
 

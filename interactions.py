@@ -57,18 +57,20 @@ class Jumper(graphics.Physical):
         if self.y > self.floor_height:
             self.velocity += (self.gravity_coeff * dt)
             self.y += (self.velocity * dt)
+            return
         elif self.y < self.floor_height:
             self.jump_count -= 1
             self.y = self.floor_height + .005
             if self.jump_count > 0:
                 self.start()
+            return
         else:
             self.velocity = 0.
 
 
 class Scaler(graphics.Physical):
 
-    def __init__(self, end_scale=.5, scale_velocity=.03, *args, **kwargs):
+    def __init__(self, end_scale=.5, scale_velocity=.015, *args, **kwargs):
         """Grows and Shrinks between its scale and the end_scale (relative to its current scale) endpoints with speed scale_velocity."""
 
         super(Scaler, self).__init__(*args, **kwargs)
