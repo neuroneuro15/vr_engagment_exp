@@ -1,10 +1,11 @@
 
 import os
-import random
+
 import itertools
 import interactions
 import motive
 import numpy as np
+from numpy import random
 import ratcave
 import ratcave.graphics as graphics
 from psychopy import event, sound
@@ -15,8 +16,8 @@ import copy
 # Note: Collect Metadata (subject, mainly, and Session Parameters) for the log
 nPhases = 2
 total_phase_secs = 5 * 60.  # 5 minutes
-corner_idx = random.randint(1, 4)  # Select which corner everything appears in.
-interaction_level = 2 #random.randint(0, 2)  # Three different levels
+corner_idx = random.randint(1, 5)  # Select which corner everything appears in.
+interaction_level = random.randint(0, 3)  # Three different levels
 interaction_distance = .15  # In meters (I think)
 
 metadata = {'Total Phases: ': nPhases,
