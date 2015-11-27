@@ -118,8 +118,9 @@ for scene in vir_scenes + [active_scene]:
 
 window = graphics.Window(active_scene, fullscr=True, screen=1)
 
+# Note: Main Experiment Loop
 # tone = sound.Sound()
-with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_directory=os.path.join('.', 'logs'),
+with graphics.Logger(scenes=[active_scene]+vir_scenes, exp_name='VR_Engagement', log_directory=os.path.join('.', 'logs'),
                      metadata_dict=metadata) as logger:
 
     for phase in xrange(nPhases):
@@ -133,14 +134,13 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
         for _, dt in itertools.izip(ratcave.utils.timers.countdown_timer(total_phase_secs, stop_iteration=True),
                                     ratcave.utils.timers.dt_timer()):
 
-            # Update Data
+            # Note: Update Data
             #motive.update()
 
             # Update the Rat's position on the virtual scene's camera
             window.virtual_scene.camera.position = rat_rb.position#rat_rb.location  # FIXME: Fix when adding in tracking!
             window.virtual_scene.camera.rotation = rat_rb.rotation#rat_rb.rotation_global
 
-            # dt = dt_timer.next()
             for mesh in window.virtual_scene.meshes + [arena]:
 
                 # Activate the mesh's custom physics if the rat gets close
@@ -154,7 +154,7 @@ with graphics.Logger(scenes=active_scene, exp_name='VR_Engagement', log_director
 
             # Draw and Flip
             window.draw()
-            logger.write()
+            logger.write(':'.join(["Motive iFrame", str(tracker.iFrame)]))
             window.flip()
 
 
