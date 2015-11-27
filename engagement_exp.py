@@ -1,9 +1,8 @@
 
 import os
-
+import datetime
 import itertools
 import interactions
-
 import numpy as np
 from numpy import random
 import ratcave
@@ -17,13 +16,15 @@ import natnetclient
 # Script
 
 # Note: Collect Metadata (subject, mainly, and Session Parameters) for the log
+exp_name = 'VR_Engagement'
 nPhases = 2
 total_phase_secs = 5 * 60.  # 5 minutes
 corner_idx = random.randint(1, 5)  # Select which corner everything appears in.
 interaction_level = random.randint(0, 3)  # Three different levels
 interaction_distance = .15  # In meters (I think)
 
-metadata = {'Total Phases: ': nPhases,
+metadata = {'Experiment:': exp_name,
+            'Total Phases: ': nPhases,
             'Phase Time (secs)': total_phase_secs,
             'Corner ID where Objects Appear:': corner_idx,
             'Interactivity Amount (0-2)': interaction_level,
@@ -38,9 +39,9 @@ else:
     print("User Cancelled. Exiting...")
     sys.exit()
 
-# Note: Connect to Motive, and get rigid bodies to track
-# FIXME: Plan to use the NatNetClient, not MotivePy, for this experiment.
+tone = sound.Sound()
 
+# Note: Connect to Motive, and get rigid bodies to track
 # MotivePy code
 """
 motive.load_project('vr_demo.ttp')
@@ -66,7 +67,7 @@ mesh_pos = {'Center': None, 'Side': None, 'Corner': None}
 for coord in mesh_pos:
     mesh_name = 'Pos' + coord + str(corner_idx) if coord is not 'Center' else 'Pos' + coord
     mesh = reader.get_mesh(mesh_name)
-    mesh.local.y += .02
+    mesh.local.y += .015
     mesh_pos[coord] = mesh.local.position # TODO: Make sure this is the correct position
 
 del reader
@@ -89,6 +90,9 @@ if interaction_level > 0:
             mesh.material.diffuse.rgb = random.rand(3).tolist()
             mesh.material.spec_color.rgb = random.rand(3).tolist()
             mesh.material.spec_weight = random.choice([0., 1., 3., 20.])
+
+            # Set Invisible, so the Logger doesn't log its position until it becomes active, to save disk space (workaround--will solve this!)
+            mesh.visible = False
 
             # Append to List
             meshes.append(mesh)
@@ -118,14 +122,25 @@ for scene in vir_scenes + [active_scene]:
 
 window = graphics.Window(active_scene, fullscr=True, screen=1)
 
+# Note: Wait for recording to start in Motive before starting the session.
+print("Waiting for Motive Recording to start.  (Please click the red recording button in Motive...)")
+today = datetime.datetime.today()
+take_filename = exp_name + today.strftime('_%Y-%m-%d_%H-%M-%S') + '.take'
+tracker.set_take_file_name(take_filename)
+tone.play()  # Just to get the experimenter's attention
+while not tracker.is_recording:
+    pass
+
 # Note: Main Experiment Loop
-# tone = sound.Sound()
-with graphics.Logger(scenes=[active_scene]+vir_scenes, exp_name='VR_Engagement', log_directory=os.path.join('.', 'logs'),
+
+with graphics.Logger(scenes=[active_scene]+vir_scenes, exp_name=exp_name, log_directory=os.path.join('.', 'logs'),
                      metadata_dict=metadata) as logger:
 
     for phase in xrange(nPhases):
 
         window.virtual_scene = vir_scenes[phase]
+        for mesh in window.virtual_scene.meshes:
+            mesh.visible = True
         window.virtual_scene.bgColor.g = .2
         ratcave.utils.update_world_position_natnet(window.virtual_scene.meshes + [arena], arena_rb, additional_rotation)
 
@@ -162,11 +177,16 @@ with graphics.Logger(scenes=[active_scene]+vir_scenes, exp_name='VR_Engagement',
             if 'escape' in event.getKeys():
                 break
         else:
+            for mesh in window.virtual_scene.meshes:
+                    mesh.visible = False
             continue
         break
 
 
 
 
+
 # Note: Clean-Up Section
 window.close()
+
+tone.play()
