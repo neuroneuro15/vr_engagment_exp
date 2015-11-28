@@ -18,9 +18,9 @@ import natnetclient
 # Note: Collect Metadata (subject, mainly, and Session Parameters) for the log
 exp_name = 'VR_Engagement'
 nPhases = 2
-total_phase_secs = 5 * 60.  # 5 minutes
+total_phase_secs = 60.#5 * 60.  # 5 minutes
 corner_idx = random.randint(1, 5)  # Select which corner everything appears in.
-interaction_level = random.randint(0, 3)  # Three different levels
+interaction_level = 2#random.randint(0, 3)  # Three different levels
 interaction_distance = .15  # In meters (I think)
 
 metadata = {'Experiment:': exp_name,
@@ -131,14 +131,18 @@ tone.play()  # Just to get the experimenter's attention
 while not tracker.is_recording:
     pass
 
-while 'space' not in event.getKeys():
-    print("Waiting for the rat to enter arena.  Once you've put him in, Press space to continue...")
+# print("Waiting for the rat to enter arena.  Once you've put him in, Press space to continue...")
+# while 'space' not in event.getKeys():
+#     pass
+
 
 # Note: Main Experiment Loop
 
-with graphics.Logger(scenes=[active_scene]+vir_scenes, exp_name=exp_name, log_directory=os.path.join('.', 'logs'),
+with graphics.Logger(scenes=[active_scene], exp_name=exp_name, log_directory=os.path.join('.', 'logs'),
                      metadata_dict=metadata) as logger:
 
+    import pdb
+    pdb.set_trace()
     for phase in xrange(nPhases):
 
         window.virtual_scene = vir_scenes[phase]
