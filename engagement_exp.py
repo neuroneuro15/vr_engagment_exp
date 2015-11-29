@@ -30,9 +30,6 @@ dlg = gui.DlgFromDict(metadata, 'Input Parameters:')
 if not dlg.OK:
     sys.exit()
 
-import pdb
-pdb.set_trace()
-
 tone = sound.Sound()
 
 # Note: Connect to Motive, and get rigid bodies to track
@@ -110,8 +107,6 @@ tracker.wait_for_recording_start(debug_mode=metadata['Rat']=='Test')
 with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log_directory=os.path.join('.', 'logs'),
                      metadata_dict=metadata) as logger:
 
-    import pdb
-    pdb.set_trace()
     for phase in xrange(metadata['nPhases']):
 
         window.virtual_scene = vir_scenes[phase]
