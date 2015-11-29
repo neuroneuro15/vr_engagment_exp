@@ -1,7 +1,7 @@
 import ratcave.graphics as graphics
 from ratcave.utils import timers
 import random
-
+import numpy as np
 
 class Spinner(graphics.Physical):
 
@@ -14,7 +14,7 @@ class Spinner(graphics.Physical):
         self.axis = axis
         self.timer = timers.countdown_timer(0)
 
-    def start(self):
+    def start(self, *args, **kwargs):
         if self.velocity:
             self.timer = timers.countdown_timer(2.)
         else:
@@ -40,7 +40,7 @@ class Jumper(graphics.Physical):
         self.jumps_remaining = 0
         self.velocity = 0.
 
-    def start(self):
+    def start(self, *args, **kwargs):
 
         # Reset to floor height (to prevent air-jumping)
         if not self.jumps_remaining:
@@ -79,7 +79,7 @@ class Scaler(graphics.Physical):
         self.scale_direction = -1 if end_scale < self.scale else 1.
         self.timer = timers.countdown_timer(0)
 
-    def start(self):
+    def start(self, *args, **kwargs):
         self.timer = timers.countdown_timer(2.)
 
     def update(self, dt):
@@ -92,3 +92,31 @@ class Scaler(graphics.Physical):
 
             # Set New Scale
             self.scale += self.scale_direction * self.scale_velocity * dt
+
+class Runner(graphics.Physical):
+
+    def __init__(self, run_speed=.3, return_time=.3, *args, **kwargs):
+        super(Runner, self).__init__(*args, **kwargs)
+        self.run_speed = run_speed
+        self.return_time = return_time
+        self.timer = timers.countdown_timer(0)
+        self.orig_x = self.x
+        self.orig_z = self.z
+
+        self.run_direction = 0., 0.
+
+    def start(self, *args, **kwargs):
+        # FIXME: Calculation of run directoin is completely wrong because of the local/world coordinate distinction
+        if self.timer.next() < 0.02:
+            run_direction = np.subtract(self.position, kwargs['from_obj'].position)[::2]  # Calculate direction away from from_obj
+            self.run_direction = run_direction / np.linalg.norm(run_direction)  # Normalilze vector
+            self.timer = timers.countdown_timer(self.return_time)
+
+    def update(self, dt):
+        if self.timer.next() > 0.:
+            move_amt = np.dot(np.dot(self.run_direction, dt), self.run_speed).tolist()
+            self.x += move_amt[0]
+            self.z += move_amt[1]
+        else:
+            self.x, self.z = self.orig_x, self.orig_z
+

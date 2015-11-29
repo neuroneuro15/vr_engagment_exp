@@ -25,7 +25,7 @@ additional_rotation = ratcave.utils.correct_orientation_natnet(arena_rb)
 # Note: Collect Metadata (subject, mainly, and Session Parameters) for the log
 metadata = {'Experiment': 'VR_Engagement',
             'nPhases': 2,
-            'Phase Time':  5 * 60.  # 5 minutes,
+            'Phase Time':  5 * 60.,  # 5 minutes,
             'Corner ID': [random.randint(1, 5), 1, 2, 3, 4], # Select which corner everything appears in.
             'Interaction Level': [random.randint(0, 3), 0, 1, 2], # Three different levels
             'Interaction Distance': .15,  # In meters (I think)
@@ -42,8 +42,6 @@ else:
     sys.exit()
 
 rat_rb = tracker.rigid_bodies[metadata['Rat Rigid Body']]
-import pdb
-pdb.set_trace()
 
 # Note: Get Arena and locations for meshes to appear in the arena
 arena = ratcave.utils.get_arena_from(cubemap=True)
@@ -85,7 +83,7 @@ if metadata['Interaction Level'] > 0:
 
     # Note: Interaction Level 2: Assign Object Properties (based on Interaction Level)
     if metadata['Interaction Level'] > 1:
-        interact_opts = [interactions.Spinner, interactions.Scaler, interactions.Jumper]
+        interact_opts = [interactions.Runner, interactions.Spinner, interactions.Scaler, interactions.Jumper]
         for group in mesh_groups:
             for mesh in group:
                 mesh.local = random.choice(interact_opts)(position=mesh.local.position, scale=mesh.local.scale)
@@ -109,6 +107,7 @@ tracker.wait_for_recording_start(debug_mode=metadata['Rat']=='Test')
 print("Waiting for rat to enter trackable area before beginning the simulation...")
 while not rat_rb.seen:
     pass
+print("...Rat Detected!")
 
 # Note: Main Experiment Loop
 with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log_directory=os.path.join('.', 'logs'),
@@ -137,7 +136,7 @@ with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log
                 for mesh in window.virtual_scene.meshes + [arena]:
                     mesh.local.update(dt)
                     if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh.position)[::2]) < metadata['Interaction Distance']:
-                        mesh.local.start()
+                        mesh.local.start(from_obj=window.virtual_scene.camera)
 
 
             # Draw and Flip
