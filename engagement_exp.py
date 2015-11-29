@@ -71,9 +71,6 @@ if metadata['Interaction Level'] > 0:
             mesh.material.spec_color.rgb = random.rand(3).tolist()
             mesh.material.spec_weight = random.choice([0., 1., 3., 20.])
 
-            # Set Invisible, so the Logger doesn't log its position until it becomes active, to save disk space (workaround--will solve this!)
-            mesh.visible = False
-
             # Append to List
             meshes.append(mesh)
         mesh_groups.append(meshes)
