@@ -44,6 +44,7 @@ rat_rb = tracker.rigid_bodies['CalibWand']
 arena = ratcave.utils.get_arena_from(cubemap=True)
 vir_arena = ratcave.utils.get_arena_from(os.path.join('obj', 'VR_Playground.blend'), cubemap=False)
 vir_arena.load_texture(graphics.resources.img_uvgrid)
+vir_arena.material.spec_weight = 0.
 
 # Note: Only for interaction levels 1 and 2 (No Virtual Meshes in interaction level 0)
 mesh_groups = []
@@ -70,6 +71,8 @@ if metadata['Interaction Level'] > 0:
             mesh.material.diffuse.rgb = random.rand(3).tolist()
             mesh.material.spec_color.rgb = random.rand(3).tolist()
             mesh.material.spec_weight = random.choice([0., 1., 3., 20.])
+
+            mesh.local.rot_y = float(random.randint(0, 360))
 
             # Append to List
             meshes.append(mesh)
@@ -122,10 +125,10 @@ with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log
             # Activate the mesh's custom physics, or start it if the rat gets close
             if metadata['Interaction Level'] > 1:
                 for mesh in window.virtual_scene.meshes + [arena]:
+                    mesh.local.update(dt)
                     if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh.position)[::2]) < metadata['Interaction Distance']:
                         mesh.local.start()
-                    else:
-                        mesh.local.update(dt)
+
 
             # Draw and Flip
             window.draw()
