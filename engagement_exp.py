@@ -25,7 +25,7 @@ additional_rotation = ratcave.utils.correct_orientation_natnet(arena_rb)
 # Note: Collect Metadata (subject, mainly, and Session Parameters) for the log
 metadata = {'Experiment': 'VR_Engagement',
             'nPhases': 2,
-            'Phase Time':  60.,#5 * 60.  # 5 minutes,
+            'Phase Time':  5 * 60.  # 5 minutes,
             'Corner ID': [random.randint(1, 5), 1, 2, 3, 4], # Select which corner everything appears in.
             'Interaction Level': [random.randint(0, 3), 0, 1, 2], # Three different levels
             'Interaction Distance': .15,  # In meters (I think)
