@@ -42,14 +42,6 @@ else:
 tone = sound.Sound()
 
 # Note: Connect to Motive, and get rigid bodies to track
-# MotivePy code
-"""
-motive.load_project('vr_demo.ttp')
-motive.update()
-arena_rb = motive.get_rigid_bodies()['Arena']
-additional_rotation = ratcave.utils.correct_orientation_motivepy(arena_rb)
-rat_rb = motive.get_rigid_bodies()['CalibWand']
-"""
 # NatNetClient code
 tracker = natnetclient.NatClient()
 arena_rb = tracker.rigid_bodies['Arena']
@@ -123,21 +115,11 @@ for scene in vir_scenes + [active_scene]:
 window = graphics.Window(active_scene, fullscr=True, screen=1)
 
 # Note: Wait for recording to start in Motive before starting the session.
-print("Waiting for Motive Recording to start.  (Please click the red recording button in Motive...)")
-today = datetime.datetime.today()
-take_filename = exp_name + today.strftime('_%Y-%m-%d_%H-%M-%S') + '.take'
-tracker.set_take_file_name(take_filename)
+tracker.set_take_file_name(exp_name +  datetime.datetime.today().strftime('_%Y-%m-%d_%H-%M-%S') + '.take')
 tone.play()  # Just to get the experimenter's attention
-while not tracker.is_recording:
-    pass
-
-# print("Waiting for the rat to enter arena.  Once you've put him in, Press space to continue...")
-# while 'space' not in event.getKeys():
-#     pass
-
+# tracker.wait_for_recording_start()
 
 # Note: Main Experiment Loop
-
 with graphics.Logger(scenes=[active_scene], exp_name=exp_name, log_directory=os.path.join('.', 'logs'),
                      metadata_dict=metadata) as logger:
 
