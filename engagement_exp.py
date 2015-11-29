@@ -13,6 +13,13 @@ import sys
 #import motive
 import natnetclient
 
+# Note: Connect to Motive, and get rigid bodies to track
+# NatNetClient code
+tracker = natnetclient.NatClient()
+arena_rb = tracker.rigid_bodies['Arena']
+additional_rotation = ratcave.utils.correct_orientation_natnet(arena_rb)
+
+
 # Script
 
 # Note: Collect Metadata (subject, mainly, and Session Parameters) for the log
@@ -23,7 +30,8 @@ metadata = {'Experiment': 'VR_Engagement',
             'Interaction Level': [random.randint(0, 3), 0, 1, 2], # Three different levels
             'Interaction Distance': .15,  # In meters (I think)
             'Experimenter': 'Nicholas A. Del Grosso',
-            'Rat': ['Test', 'Nessie', 'FuzzPatch', 'FlatWhite', 'Bridger']
+            'Rat': ['Test', 'Nessie', 'FuzzPatch', 'FlatWhite', 'Bridger'],
+            'Rat Rigid Body': ['Rat']+tracker.rigid_bodies.keys()
             }
 
 dlg = gui.DlgFromDict(metadata, 'Input Parameters:')
@@ -33,12 +41,9 @@ if dlg.OK:
 else:
     sys.exit()
 
-# Note: Connect to Motive, and get rigid bodies to track
-# NatNetClient code
-tracker = natnetclient.NatClient()
-arena_rb = tracker.rigid_bodies['Arena']
-additional_rotation = ratcave.utils.correct_orientation_natnet(arena_rb)
-rat_rb = tracker.rigid_bodies['CalibWand']
+rat_rb = tracker.rigid_bodies[metadata['Rat Rigid Body']]
+import pdb
+pdb.set_trace()
 
 # Note: Get Arena and locations for meshes to appear in the arena
 arena = ratcave.utils.get_arena_from(cubemap=True)
@@ -99,6 +104,11 @@ tone = sound.Sound()
 tone.play()  # Just to get the experimenter's attention
 tracker.set_take_file_name(metadata['Experiment'] + datetime.datetime.today().strftime('_%Y-%m-%d_%H-%M-%S') + '.take')
 tracker.wait_for_recording_start(debug_mode=metadata['Rat']=='Test')
+
+# Note: Don't start recording/timing until rat has been placed in the arena.
+print("Waiting for rat to enter trackable area before beginning the simulation...")
+while not rat_rb.seen:
+    pass
 
 # Note: Main Experiment Loop
 with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log_directory=os.path.join('.', 'logs'),
