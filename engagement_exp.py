@@ -19,18 +19,19 @@ import natnetclient
 metadata = {'Experiment': 'VR_Engagement',
             'nPhases': 2,
             'Phase Time':  60.,#5 * 60.  # 5 minutes,
-            'Corner ID': random.randint(1, 5),  # Select which corner everything appears in.
-            'Interaction Level': 2, #random.randint(0, 3)  # Three different levels
+            'Corner ID': [random.randint(1, 5), 1, 2, 3, 4], # Select which corner everything appears in.
+            'Interaction Level': [random.randint(0, 3), 0, 1, 2], # Three different levels
             'Interaction Distance': .15,  # In meters (I think)
-            'Experimenter': 'Nicholas A. Del Grosso'}
+            'Experimenter': 'Nicholas A. Del Grosso',
+            'Rat': ['Test', 'Nessie', 'FuzzPatch', 'FlatWhite', 'Bridger']
+            }
 
-info = {'Rat': ['Test', 'Nessie', 'FuzzPatch', 'FlatWhite', 'Bridger']}
-dlg = gui.DlgFromDict(info, 'Input Rat Name:')
-if dlg.OK:
-    metadata.update(info)
-else:
-    print("User Cancelled. Exiting...")
+dlg = gui.DlgFromDict(metadata, 'Input Parameters:')
+if not dlg.OK:
     sys.exit()
+
+import pdb
+pdb.set_trace()
 
 tone = sound.Sound()
 
@@ -101,9 +102,9 @@ if metadata['Interaction Level'] > 0:
 window = graphics.Window(active_scene, fullscr=True, screen=1)
 
 # Note: Wait for recording to start in Motive before starting the session.
-tracker.set_take_file_name(metadata['Experiment'] + datetime.datetime.today().strftime('_%Y-%m-%d_%H-%M-%S') + '.take')
 tone.play()  # Just to get the experimenter's attention
-# tracker.wait_for_recording_start()
+tracker.set_take_file_name(metadata['Experiment'] + datetime.datetime.today().strftime('_%Y-%m-%d_%H-%M-%S') + '.take')
+tracker.wait_for_recording_start(debug_mode=metadata['Rat']=='Test')
 
 # Note: Main Experiment Loop
 with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log_directory=os.path.join('.', 'logs'),
