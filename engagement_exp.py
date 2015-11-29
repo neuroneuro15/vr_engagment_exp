@@ -27,8 +27,12 @@ metadata = {'Experiment': 'VR_Engagement',
             }
 
 dlg = gui.DlgFromDict(metadata, 'Input Parameters:')
-if not dlg.OK:
+if dlg.OK:
+    metadata['Interaction Level'] = int(metadata['Interaction Level'])
+    metadata['Corner ID'] = int(metadata['Corner ID'])
+else:
     sys.exit()
+
 
 tone = sound.Sound()
 
@@ -44,20 +48,18 @@ arena = ratcave.utils.get_arena_from(cubemap=True)
 vir_arena = ratcave.utils.get_arena_from(os.path.join('obj', 'VR_Playground.blend'), cubemap=False)
 vir_arena.load_texture(graphics.resources.img_uvgrid)
 
-# Generate list of dict of position-triples (4 corners, paired with 4 sides, each with a center)
-reader =graphics.WavefrontReader(os.path.join('obj', 'VR_Playground.obj'))
-mesh_pos = {'Center': None, 'Side': None, 'Corner': None}
-for coord in mesh_pos:
-    mesh_name = 'Pos' + coord + str(metadata['Corner ID']) if coord is not 'Center' else 'Pos' + coord
-    mesh = reader.get_mesh(mesh_name)
-    mesh.local.y += .015
-    mesh_pos[coord] = mesh.local.position # TODO: Make sure this is the correct position
-
-del reader
-
 # Note: Only for interaction levels 1 and 2 (No Virtual Meshes in interaction level 0)
 mesh_groups = []
 if metadata['Interaction Level'] > 0:
+
+    # Generate list of dict of position-triples (4 corners, paired with 4 sides, each with a center)
+    reader =graphics.WavefrontReader(os.path.join('obj', 'VR_Playground.obj'))
+    mesh_pos = {'Center': None, 'Side': None, 'Corner': None}
+    for coord in mesh_pos:
+        mesh_name = 'Pos' + coord + str(metadata['Corner ID']) if coord is not 'Center' else 'Pos' + coord
+        mesh = reader.get_mesh(mesh_name)
+        mesh.local.y += .015
+        mesh_pos[coord] = mesh.local.position
 
     # Note: Import Mesh Objects (randomly chosen) and put in groups of three, one group for each phase
     vir_reader = graphics.WavefrontReader(os.path.join('obj', 'NOP_Primitives.obj'))
