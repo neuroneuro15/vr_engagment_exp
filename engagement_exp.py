@@ -99,18 +99,11 @@ if interaction_level > 0:
 
 
 # Note: Build Scenes (1st half, 2nd half) and window
-vir_scenes = [graphics.Scene([vir_arena]) for phase in range(nPhases)]
+active_scene = graphics.Scene([arena], camera=graphics.projector, light=graphics.projector, bgColor=(0., 0., .2, 1.))
+vir_scenes = [graphics.Scene([vir_arena], light=graphics.projector) for phase in range(nPhases)]
 if interaction_level > 0:
     for meshes, scene in zip(mesh_groups, vir_scenes):
         scene.meshes.extend(meshes)
-
-active_scene = graphics.Scene([arena])
-active_scene.camera = graphics.projector
-active_scene.camera.fov_y = 27.8
-active_scene.bgColor.b = .2
-
-for scene in vir_scenes + [active_scene]:
-    scene.light.position = active_scene.camera.position
 
 window = graphics.Window(active_scene, fullscr=True, screen=1)
 
