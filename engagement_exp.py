@@ -86,7 +86,6 @@ if metadata['Interaction Level'] > 0:
             for mesh in group:
                 mesh.local = random.choice(interact_opts)(position=mesh.local.position, scale=mesh.local.scale)
 
-
 # Note: Build Scenes (1st half, 2nd half) and window
 active_scene = graphics.Scene([arena], camera=graphics.projector, light=graphics.projector, bgColor=(0., 0., .2, 1.))
 vir_scenes = [graphics.Scene([vir_arena], light=graphics.projector, bgColor=(0., .2, 0., 1.)) for phase in range(metadata['nPhases'])]
@@ -107,9 +106,11 @@ with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log
 
     for phase in xrange(metadata['nPhases']):
 
+        # Assign new virtual scene, and make its (and only its) meshes visible.
         window.virtual_scene = vir_scenes[phase]
-        for mesh in window.virtual_scene.meshes:
-            mesh.visible = True
+        for mesh in [mesh for mesh_list in mesh_groups for mesh in mesh_list]:
+            mesh.visible = True if mesh in window.virtual_scene.meshes else False
+
         ratcave.utils.update_world_position_natnet(window.virtual_scene.meshes + [arena], arena_rb, additional_rotation)
 
         logger.write('Start of Phase {}'.format(phase))
@@ -134,13 +135,10 @@ with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log
             logger.write(':'.join(["Motive iFrame", str(tracker.iFrame)]))
             window.flip()
 
-
             # Give keyboard option to cleanly break out of the nested for-loop
             if 'escape' in event.getKeys():
                 break
         else:
-            for mesh in window.virtual_scene.meshes:
-                    mesh.visible = False
             continue
         break
 
