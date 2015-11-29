@@ -55,8 +55,6 @@ for coord in mesh_pos:
 
 del reader
 
-
-
 # Note: Only for interaction levels 1 and 2 (No Virtual Meshes in interaction level 0)
 mesh_groups = []
 if metadata['Interaction Level'] > 0:
@@ -91,7 +89,7 @@ if metadata['Interaction Level'] > 0:
 
 # Note: Build Scenes (1st half, 2nd half) and window
 active_scene = graphics.Scene([arena], camera=graphics.projector, light=graphics.projector, bgColor=(0., 0., .2, 1.))
-vir_scenes = [graphics.Scene([vir_arena], light=graphics.projector) for phase in range(metadata['nPhases'])]
+vir_scenes = [graphics.Scene([vir_arena], light=graphics.projector, bgColor=(0., .2, 0., 1.)) for phase in range(metadata['nPhases'])]
 if metadata['Interaction Level'] > 0:
     for meshes, scene in zip(mesh_groups, vir_scenes):
         scene.meshes.extend(meshes)
@@ -112,7 +110,6 @@ with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log
         window.virtual_scene = vir_scenes[phase]
         for mesh in window.virtual_scene.meshes:
             mesh.visible = True
-        window.virtual_scene.bgColor.g = .2
         ratcave.utils.update_world_position_natnet(window.virtual_scene.meshes + [arena], arena_rb, additional_rotation)
 
         logger.write('Start of Phase {}'.format(phase))
@@ -121,22 +118,16 @@ with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log
                                     ratcave.utils.timers.dt_timer()):
 
             # Note: Update Data
-            #motive.update()
+            window.virtual_scene.camera.position = rat_rb.position
+            window.virtual_scene.camera.rotation = rat_rb.rotation
 
-            # Update the Rat's position on the virtual scene's camera
-            window.virtual_scene.camera.position = rat_rb.position#rat_rb.location  # FIXME: Fix when adding in tracking!
-            window.virtual_scene.camera.rotation = rat_rb.rotation#rat_rb.rotation_global
-
-            for mesh in window.virtual_scene.meshes + [arena]:
-
-                # Activate the mesh's custom physics if the rat gets close
-                if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh.position)[::2]) < metadata['Interaction Distance']:
-                    # tone.play()
-                    mesh.local.start()
-
-
-                # Update all mesh's physics
-                mesh.local.update(dt)
+            # Activate the mesh's custom physics, or start it if the rat gets close
+            if metadata['Interaction Level'] > 1:
+                for mesh in window.virtual_scene.meshes + [arena]:
+                    if np.linalg.norm(np.subtract(window.virtual_scene.camera.position, mesh.position)[::2]) < metadata['Interaction Distance']:
+                        mesh.local.start()
+                    else:
+                        mesh.local.update(dt)
 
             # Draw and Flip
             window.draw()
@@ -154,10 +145,6 @@ with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log
         break
 
 
-
-
-
 # Note: Clean-Up Section
 window.close()
-
 tone.play()
