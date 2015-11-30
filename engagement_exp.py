@@ -111,7 +111,7 @@ while not rat_rb.seen:
 print("...Rat Detected!")
 
 # Note: Main Experiment Loop
-with graphics.Logger(scenes=[active_scene], exp_name=metadata['Experiment'], log_directory=os.path.join('.', 'logs'),
+with graphics.Logger(scenes=[active_scene]+vir_scenes, exp_name=metadata['Experiment'], log_directory=os.path.join('.', 'logs'),
                      metadata_dict=metadata) as logger:
 
     for phase in xrange(metadata['nPhases']):
