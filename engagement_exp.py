@@ -100,7 +100,7 @@ window = graphics.Window(active_scene, fullscr=True, screen=1)
 # Note: Wait for recording to start in Motive before starting the session.
 tone = sound.Sound()
 tone.play()  # Just to get the experimenter's attention
-tracker.set_take_file_name(metadata['Experiment'] + datetime.datetime.today().strftime('_%Y-%m-%d_%H-%M-%S') + '.take')
+tracker.set_take_file_name('_'.join([metadata['Experiment'], metadata['Rat'], datetime.datetime.today().strftime('%Y-%m-%d_%H-%M-%S')]) + '.take')
 tracker.wait_for_recording_start(debug_mode=metadata['Rat']=='Test')
 
 # Note: Don't start recording/timing until rat has been placed in the arena.
