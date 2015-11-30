@@ -31,7 +31,8 @@ metadata = {'Experiment': 'VR_Engagement',
             'Interaction Distance': .15,  # In meters (I think)
             'Experimenter': 'Nicholas A. Del Grosso',
             'Rat': ['Test', 'Nessie', 'FuzzPatch', 'FlatWhite', 'Bridger'],
-            'Rat Rigid Body': ['Rat']+tracker.rigid_bodies.keys()
+            'Rat Rigid Body': ['Rat']+tracker.rigid_bodies.keys(),
+            'Texture Size': 1024
             }
 
 dlg = gui.DlgFromDict(metadata, 'Input Parameters:')
@@ -95,7 +96,7 @@ if metadata['Interaction Level'] > 0:
     for meshes, scene in zip(mesh_groups, vir_scenes):
         scene.meshes.extend(meshes)
 
-window = graphics.Window(active_scene, fullscr=True, screen=1)
+window = graphics.Window(active_scene, fullscr=True, screen=1, texture_size=metadata['Texture Size'])
 
 # Note: Wait for recording to start in Motive before starting the session.
 tone = sound.Sound()
