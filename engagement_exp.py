@@ -2,6 +2,7 @@
 import os
 import datetime
 import itertools
+import copy
 import interactions
 import numpy as np
 from numpy import random
@@ -69,7 +70,7 @@ if metadata['Interaction Level'] > 0:
         meshes = []
         for pos_coords in mesh_pos.values():
             # Read Mesh
-            mesh = vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.02)
+            mesh = copy.deepcopy(vir_reader.get_mesh(random.choice(vir_reader.mesh_names), position=pos_coords, centered=True, scale=.02))
 
             # Randomly Set Color
             mesh.material.diffuse.rgb = random.rand(3).tolist()
